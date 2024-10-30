@@ -1,18 +1,21 @@
 package com.springboot.backend.ruslan.usersapp.users_backend.controllers;
-
-
 import org.springframework.web.bind.annotation.RestController;
 
 import com.springboot.backend.ruslan.usersapp.users_backend.entities.User;
 import com.springboot.backend.ruslan.usersapp.users_backend.services.UserService;
 
+import jakarta.validation.Valid;
+
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +37,7 @@ import org.springframework.web.bind.annotation.PutMapping;
  * sean solicitados desde otro dominio distinto al dominio desde el cual se sirvió la página.
  * Habilita las solicitudes HTTP desde otros dominios, lo cual es útil cuando tu frontend y backend 
  * están en diferentes dominios o puertos.
+ * 
  */
 @CrossOrigin(origins = {"http://localhost:4200"}) 
 @RestController 
@@ -79,7 +83,13 @@ public class UserController {
      */
 
     @PostMapping
-    public ResponseEntity<User> create(@RequestBody User user) {
+    public ResponseEntity<?> create(@Valid @RequestBody User user, BindingResult result) {
+        /**
+         * Si el objeto user tiene errores de validación, se recogen los errores en un Map y se devuelven al cliente Angular.
+         */
+        if(result.hasErrors()){
+            return validation(result);
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(user));
     }
 
@@ -92,7 +102,12 @@ public class UserController {
      */
     
     @PutMapping("/{id}")
-    public ResponseEntity<User> updtate(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<?> updtate(@Valid @RequestBody User user, BindingResult result, @PathVariable Long id) {
+
+        if(result.hasErrors()){
+            return validation(result);
+        }
+
        // Se hace una consulta a la base de datos para verificar si el usuario existe
         Optional<User> userOptional = service.findByUser(id);
         if(userOptional.isPresent()) {
@@ -109,6 +124,8 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
 
+   
+
     /**
      * La anotación @DeleteMapping sirve para eliminar un recurso existente en el servidor.
      * @param id pasa el id del usuario que se quiere eliminar.
@@ -124,6 +141,20 @@ public class UserController {
             return ResponseEntity.noContent().build(); 
         }
             return ResponseEntity.notFound().build();
+    }
+
+    /**
+     * Método que recoge los errores de validación.
+     * @param result se le pasa un objeto de tipo BindingResult que contiene los errores de validación.
+     * @return devuelve un objeto de tipo ResponseEntity<?> con los errores de validación y el estado HTTP 400 Bad Request.
+     */
+
+    private ResponseEntity<?> validation(BindingResult result) {
+        Map<String, String> errors = new HashMap<>();
+        result.getFieldErrors().forEach(error -> {
+            errors.put(error.getField(), "El campo " + error.getField() + " " + error.getDefaultMessage());
+        });
+        return ResponseEntity.badRequest().body(errors);
     }
     
 

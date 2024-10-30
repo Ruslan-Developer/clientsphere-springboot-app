@@ -5,6 +5,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
 /**
  * Aqui se define la entidad User, que se mapea a la tabla users en la base de datos.
@@ -20,10 +24,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY) //Indica que el valor de la clave primaria se generará automáticamente
     private Long id;
 
+    @NotBlank //Indica que el campo no puede estar vacío ni ser nulo ni contener solo espacios en blanco
     private String name;
+    @NotEmpty
     private String lastname;
+    @NotEmpty
+    @Email
     private String email;
+    @NotEmpty
+    @Size(min = 4, max = 12)
     private String username;
+    @NotBlank
     private String password;
 
     
