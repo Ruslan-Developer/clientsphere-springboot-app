@@ -3,6 +3,9 @@ package com.springboot.backend.ruslan.usersapp.users_backend.repositories;
 import org.springframework.data.repository.CrudRepository;
 
 import com.springboot.backend.ruslan.usersapp.users_backend.entities.User;
+
+import java.util.Optional;
+
 /**
  * UserRepository es una interfaz que extiende de CrudRepository,
  * que es una interfaz de Spring Data JPA que nos proporciona métodos para realizar operaciones CRUD
@@ -12,5 +15,7 @@ import com.springboot.backend.ruslan.usersapp.users_backend.entities.User;
  */
  
 public interface UserRepository extends CrudRepository<User, Long> {
+
+    Optional<User> findByUsername(String name);
 
 }

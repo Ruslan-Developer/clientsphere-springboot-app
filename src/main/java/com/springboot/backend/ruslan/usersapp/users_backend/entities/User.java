@@ -58,9 +58,10 @@ public class User {
      * Con @JoiColummn conseguimos mapear la relación entre las tablas users y users_roles
      * Luego usamos inverseJoinColumns para mapear la relación inversa entre las tablas roles y users_roles
      * Al tener aqui los roles de Role que está mapeada a la tabla roles, se establece la relación entre users y roles
-     * Luego tenemos qie indicar los campos únicos user_id y role_id con la anotación @UniqueConstraint.
+     * Luego tenemos que indicar los campos únicos user_id y role_id con la anotación @UniqueConstraint.
      */
-    @JoinTable(name = "users_roles", joinColumns = {@JoinColumn(name="user_id")},
+    @JoinTable(name = "users_roles", 
+    joinColumns = {@JoinColumn(name="user_id")},
     inverseJoinColumns = {@JoinColumn(name="role_id")},
     uniqueConstraints = { @UniqueConstraint(columnNames = {"user_id", "role_id"})}
     ) 
