@@ -1,9 +1,20 @@
 package com.springboot.backend.ruslan.usersapp.users_backend.entities;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.ArrayList;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -36,6 +47,28 @@ public class User {
     private String username;
     @NotBlank
     private String password;
+    /**
+     * Al tener el usuario varios roles, se establece una relación de muchos a muchos por ello
+     * creamos una lista de roles que se mapea a la tabla roles.
+     */
+    @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"}) //Evita la recursividad en la serialización JSON
+    @ManyToMany(fetch = FetchType.LAZY)
+    /**
+     * Con @JoinTable indicamos que la relación entre las tablas users y roles se mapea a la tabla users_roles.
+     * Con @JoiColummn conseguimos mapear la relación entre las tablas users y users_roles
+     * Luego usamos inverseJoinColumns para mapear la relación inversa entre las tablas roles y users_roles
+     * Al tener aqui los roles de Role que está mapeada a la tabla roles, se establece la relación entre users y roles
+     * Luego tenemos qie indicar los campos únicos user_id y role_id con la anotación @UniqueConstraint.
+     */
+    @JoinTable(name = "users_roles", joinColumns = {@JoinColumn(name="user_id")},
+    inverseJoinColumns = {@JoinColumn(name="role_id")},
+    uniqueConstraints = { @UniqueConstraint(columnNames = {"user_id", "role_id"})}
+    ) 
+    private List<Role> roles;
+
+    public User() {
+        this.roles = new ArrayList<>();
+    }
 
     
     public Long getId() {
@@ -75,6 +108,16 @@ public class User {
         this.password = password;
     }
 
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
+    
     
 
 }
