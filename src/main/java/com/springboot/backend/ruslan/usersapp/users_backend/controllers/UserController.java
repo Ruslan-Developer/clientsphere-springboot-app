@@ -2,6 +2,7 @@ package com.springboot.backend.ruslan.usersapp.users_backend.controllers;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.springboot.backend.ruslan.usersapp.users_backend.entities.User;
+import com.springboot.backend.ruslan.usersapp.users_backend.models.UserRequest;
 import com.springboot.backend.ruslan.usersapp.users_backend.services.UserService;
 
 import jakarta.validation.Valid;
@@ -67,7 +68,7 @@ public class UserController {
     @GetMapping("/{id}") //Es un PathVariable lo que nos permite obtener el id de la URL
     public ResponseEntity<?> show(@PathVariable Long id) {
      
-        Optional<User> userOptional = service.findByUser(id);
+        Optional<User> userOptional = service.findById(id);
         if(userOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.OK).body(userOptional.orElseThrow()); //Tambien podemos usar el método get() para obtener el valor
         }else {
@@ -98,27 +99,24 @@ public class UserController {
      * @param id se pasa el id del usuario que se quiere actualizar a través de la URL desde el cliente Angular.
      * @param user le pasamos un objeto JSON que se envía en el cuerpo de la petición desde el cliente Angular. 
      * @return devuelve un objeto de tipo ResponseEntity<User> con el usuario actualizado y el estado HTTP 201 Created.
-     * @ResponeEntity es una clase que representa toda la respuesta HTTP: código de estado, encabezados y cuerpo al cliente. 
+     * @ResponeEntity es una clase que representa toda la respuesta HTTP: código de estado, encabezados y cuerpo al cliente.
+     * Dentro del método llamamos al método update() de la clase UserServiceImpl a traves de la interfaz UserService.
+     * El método update() recibe un objeto de tipo User y un id de tipo Long y devuelve un objeto del tipo Optional<User>.
+     * Mediante el método isPresent() comprobamos si el objeto Optional<User> contiene un valor. 
      */
     
     @PutMapping("/{id}")
-    public ResponseEntity<?> updtate(@Valid @RequestBody User user, BindingResult result, @PathVariable Long id) {
+    public ResponseEntity<?> updtate(@Valid @RequestBody UserRequest user, BindingResult result, @PathVariable Long id) {
 
         if(result.hasErrors()){
             return validation(result);
         }
 
-       // Se hace una consulta a la base de datos para verificar si el usuario existe
-        Optional<User> userOptional = service.findByUser(id);
+        
+        Optional<User> userOptional = service.update(user, id);
         if(userOptional.isPresent()) {
-            User userBD = userOptional.get();
-            userBD.setEmail(user.getEmail());
-            userBD.setLastname(user.getLastname());
-            userBD.setName(user.getName());
-            userBD.setPassword(user.getPassword());
-            userBD.setUsername(user.getUsername());
-            //Devuelve un JSON con el usuario actualizado al cliente Angular al Observable que representa la respuesta futura del servidor
-            return ResponseEntity.status(HttpStatus.CREATED).body(service.save(userBD));
+     
+            return ResponseEntity.ok(userOptional.orElseThrow());
         }
 
         return ResponseEntity.notFound().build();
@@ -134,7 +132,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
-        Optional<User> userOptional = service.findByUser(id);
+        Optional<User> userOptional = service.findById(id);
         if(userOptional.isPresent()) {
             service.deleteById(id);
             // Indica que la petición se ha completado con éxito y que no devuelve contenido en el cuerpo de la respuesta

@@ -43,7 +43,7 @@ public class User {
     @Email
     private String email;
     @NotEmpty
-    @Size(min = 4, max = 80)
+    @Size(min = 4, max = 20)
     private String username;
     @NotBlank
     private String password;

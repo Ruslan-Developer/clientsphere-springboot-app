@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.springboot.backend.ruslan.usersapp.users_backend.entities.User;
+import com.springboot.backend.ruslan.usersapp.users_backend.models.UserRequest;
 import com.springboot.backend.ruslan.usersapp.users_backend.repositories.UserRepository;
 
 
@@ -37,10 +39,14 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository repository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     
 
-    public UserServiceImpl(UserRepository repository) {
+    public UserServiceImpl(UserRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true) //Indica que el método es de solo lectura
@@ -53,7 +59,7 @@ public class UserServiceImpl implements UserService {
     // La transacción de solo lectura lo que permite optimizar la base de datos, ya que no se bloquea la base de datos.
     @Transactional(readOnly = true)
     @Override
-    public Optional<User> findByUser(Long id) {
+    public Optional<User> findById(Long id) {
 
         return repository.findById(id);
       
@@ -61,9 +67,30 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public User save(User user) {
-
+        //Encripta la contraseña del usuario antes de guardarla en la base de datos
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return repository.save(user);
         
+    }
+
+    @Transactional
+    @Override
+    public Optional<User> update(UserRequest user, Long id) {
+
+        Optional<User> userOptional = repository.findById(id);
+        if(userOptional.isPresent()) {
+            User userBD = userOptional.get();
+            userBD.setEmail(user.getEmail());
+            userBD.setLastname(user.getLastname());
+            userBD.setName(user.getName());
+       
+            userBD.setUsername(user.getUsername());
+            repository.save(userBD); //Guarda el usuario actualizado en la base de datos
+            return Optional.of(userBD); //Devuelve un Optional con el usuario actualizado
+        }
+
+        return Optional.empty(); //Devuelve un Optional vacío si no se encuentra el usuario
+       
     }
 
     @Transactional
@@ -73,5 +100,7 @@ public class UserServiceImpl implements UserService {
         repository.deleteById(id);
         
     }
+
+   
 
 }
