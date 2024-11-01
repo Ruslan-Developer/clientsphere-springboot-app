@@ -81,8 +81,15 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         org.springframework.security.core.userdetails.User user = (org.springframework.security.core.userdetails.User) authResult.getPrincipal();
         
         String username = user.getUsername();
-
+        /**
+         * ! NOTA: Revisar funcionamiento de esta parte del código, en concreto:
+         * ! Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
+         * ! Claims claims = Jwts
+         * ! String jwt = Jwts.builder()
+         */
         Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
+        //Si encuentra el rol de administrador, isAdmin será true.
+        boolean isAdmin = roles.stream().anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"));
         /**
          * Creamos un objeto Claims para almacenar información adicional en el token.
          * En este caso, almacenamos los roles del usuario y el nombre de usuario.
@@ -91,6 +98,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .claims()
                 .add("authorities", new ObjectMapper().writeValueAsString(roles))
                 .add("username", username)
+                .add("isAdmin", isAdmin) //Si isAdmin es true, lo agregamos al token.
                 .build();
 
         String jwt = Jwts.builder()
