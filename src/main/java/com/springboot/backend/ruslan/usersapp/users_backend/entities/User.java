@@ -3,6 +3,7 @@ package com.springboot.backend.ruslan.usersapp.users_backend.entities;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 
@@ -16,6 +17,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -37,14 +39,32 @@ public class User {
 
     @NotBlank //Indica que el campo no puede estar vacío ni ser nulo ni contener solo espacios en blanco
     private String name;
+    
     @NotEmpty
     private String lastname;
+    
     @NotEmpty
     @Email
     private String email;
+    
     @NotEmpty
     @Size(min = 4, max = 20)
     private String username;
+
+    /**
+     * JPA ignorará este campo cuando realice operaciones de persistencia (como insertar o actualizar) en la entidad.
+     * Es útil cuando tienes campos en tu entidad que no deseas almacenar en la base de datos,
+     *  pero que aún necesitas en tu lógica de negocio.
+     * JsonProperty.Access.WRITE_ONLY especifica que el campo admin solo debe ser considerado durante la deserialización 
+     * (cuando se convierte JSON a un objeto Java). Nota: ver en Postman campo admin: true || false
+     * Esto significa que el campo admin puede ser establecido a partir de datos JSON entrantes, 
+     * pero no será incluido en la salida JSON cuando el objeto Java se serialice a JSON.
+     */
+    
+    @Transient  
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) //Nos permite luego rellenar el campo en la clase Entity o UserRequest
+    private boolean admin;
+
     @NotBlank
     private String password;
     /**
@@ -119,6 +139,13 @@ public class User {
         this.roles = roles;
     }
     
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
+    }
     
 
 }

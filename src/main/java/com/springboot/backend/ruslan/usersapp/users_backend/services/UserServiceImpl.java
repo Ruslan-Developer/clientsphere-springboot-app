@@ -77,8 +77,14 @@ public class UserServiceImpl implements UserService {
     public User save(User user) {
         List<Role> roles = new ArrayList<>();
         Optional<Role> optionalRoleUser = roleRepository.findByName("ROLE_USER");
-
         optionalRoleUser.ifPresent(role -> roles.add(role));
+
+        if (user.isAdmin()){
+            Optional<Role> optionalRoleAdmin = roleRepository.findByName("ROLE_ADMIN");
+            optionalRoleAdmin.ifPresent(role -> roles.add(role));
+        }
+
+       
         //NOTA: se me olvidó pasar el rol al usuario antes de guardar el usuario en la base de datos
         user.setRoles(roles);
         //Encripta la contraseña del usuario antes de guardarla en la base de datos
@@ -97,8 +103,18 @@ public class UserServiceImpl implements UserService {
             userBD.setEmail(user.getEmail());
             userBD.setLastname(user.getLastname());
             userBD.setName(user.getName());
-       
             userBD.setUsername(user.getUsername());
+
+            //Antes de guardar actualizar el rol del usuario
+            List<Role> roles = new ArrayList<>();
+            Optional<Role> optionalRoleUser = roleRepository.findByName("ROLE_USER");
+            optionalRoleUser.ifPresent(role -> roles.add(role));
+
+            if (user.isAdmin()){
+                Optional<Role> optionalRoleAdmin = roleRepository.findByName("ROLE_ADMIN");
+                optionalRoleAdmin.ifPresent(role -> roles.add(role));
+            }
+            userBD.setRoles(roles); //Actualiza el rol del usuario
             repository.save(userBD); //Guarda el usuario actualizado en la base de datos
             return Optional.of(userBD); //Devuelve un Optional con el usuario actualizado
         }
