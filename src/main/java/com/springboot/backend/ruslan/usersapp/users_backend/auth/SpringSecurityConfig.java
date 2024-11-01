@@ -13,13 +13,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.springboot.backend.ruslan.usersapp.users_backend.auth.filter.JWTAuthenticationFilter;
+import com.springboot.backend.ruslan.usersapp.users_backend.auth.filter.JWTValidationFilter;
 
 
 @Configuration
 public class SpringSecurityConfig {
     
     @Autowired
-    private AuthenticationConfiguration authConfiguration;
+    private AuthenticationConfiguration AuthenticationConfiguration;
 
     /**
      * Este metodo nos permite poder obtener el componente AuthenticationManager que es un componente central en Spring Security
@@ -33,7 +34,7 @@ public class SpringSecurityConfig {
      */
     @Bean 
     AuthenticationManager authenticationManager() throws Exception {
-        return authConfiguration.getAuthenticationManager();
+        return AuthenticationConfiguration.getAuthenticationManager();
     }
 
     /**
@@ -53,11 +54,12 @@ public class SpringSecurityConfig {
         authz
         .requestMatchers(HttpMethod.GET, "/api/users", "/api/users/{users}").permitAll()
         .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasAnyRole("USER", "ADMIN")
-            .requestMatchers(HttpMethod.POST, "/api/users").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.PUT, "/api/users/{id}").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasRole("ADMIN")
-            .anyRequest().authenticated())
-        .addFilter(new JWTAuthenticationFilter(authenticationManager()))
+        .requestMatchers(HttpMethod.POST, "/api/users").hasRole("ADMIN")
+        .requestMatchers(HttpMethod.PUT, "/api/users/{id}").hasRole("ADMIN")
+        .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasRole("ADMIN")
+        .anyRequest().authenticated())
+        .addFilter(new JWTAuthenticationFilter(authenticationManager())) // Se añade el filtro de autenticación JWT
+        .addFilter(new JWTValidationFilter(authenticationManager())) // Se añade el filtro de validación del token JWT
         .csrf(config -> config.disable())
         .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .build();
