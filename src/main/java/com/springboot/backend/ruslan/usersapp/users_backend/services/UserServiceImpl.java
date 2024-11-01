@@ -1,5 +1,6 @@
 package com.springboot.backend.ruslan.usersapp.users_backend.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,8 +9,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.springboot.backend.ruslan.usersapp.users_backend.entities.Role;
 import com.springboot.backend.ruslan.usersapp.users_backend.entities.User;
 import com.springboot.backend.ruslan.usersapp.users_backend.models.UserRequest;
+import com.springboot.backend.ruslan.usersapp.users_backend.repositories.RoleRepository;
 import com.springboot.backend.ruslan.usersapp.users_backend.repositories.UserRepository;
 
 
@@ -41,12 +44,16 @@ public class UserServiceImpl implements UserService {
     private UserRepository repository;
 
     @Autowired
+    private RoleRepository roleRepository;
+
+  
     private PasswordEncoder passwordEncoder;
     
 
-    public UserServiceImpl(UserRepository repository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository repository, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
     }
 
     @Transactional(readOnly = true) //Indica que el método es de solo lectura
@@ -64,9 +71,16 @@ public class UserServiceImpl implements UserService {
         return repository.findById(id);
       
     }
+    
     @Transactional
     @Override
     public User save(User user) {
+        List<Role> roles = new ArrayList<>();
+        Optional<Role> optionalRoleUser = roleRepository.findByName("ROLE_USER");
+
+        optionalRoleUser.ifPresent(role -> roles.add(role));
+        //NOTA: se me olvidó pasar el rol al usuario antes de guardar el usuario en la base de datos
+        user.setRoles(roles);
         //Encripta la contraseña del usuario antes de guardarla en la base de datos
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return repository.save(user);
