@@ -62,7 +62,7 @@ public class User {
      */
     
     @Transient  
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) //Nos permite luego rellenar el campo en la clase Entity o UserRequest
+   // @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) //Nos permite luego rellenar el campo en la clase Entity o UserRequest
     private boolean admin;
 
     @NotBlank

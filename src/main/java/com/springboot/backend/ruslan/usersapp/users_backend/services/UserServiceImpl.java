@@ -3,6 +3,8 @@ package com.springboot.backend.ruslan.usersapp.users_backend.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -60,7 +62,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findALL() {
 
-        return (List<User>) repository.findAll(); //Devuelve un Iterable, por lo que se hace un casting a List<User>
+        return ((List<User>) this.repository.findAll()).stream().map(user -> {
+            boolean admin = user.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.getName()));
+            user.setAdmin(admin);
+            return user;
+            
+        }).collect(Collectors.toList()); 
 
     }
     // La transacción de solo lectura lo que permite optimizar la base de datos, ya que no se bloquea la base de datos.
