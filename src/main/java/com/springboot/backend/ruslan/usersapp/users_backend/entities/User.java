@@ -19,8 +19,11 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 /**
@@ -36,17 +39,30 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) //Indica que el valor de la clave primaria se generará automáticamente
     private Long id;
+    @NotEmpty
+    private String lastname;
 
     @NotBlank //Indica que el campo no puede estar vacío ni ser nulo ni contener solo espacios en blanco
     private String name;
-    
+    @NotBlank
+    private String birthday;
     @NotEmpty
-    private String lastname;
-    
+    private String gender;
+    @NotEmpty
+    private String country;
+    @NotEmpty
+    private String municipality;
+    @NotEmpty
+    private String province;
+    @NotNull
+    @Min(100000000)
+    @Max(999999999)
+    private Integer phone;
+
     @NotEmpty
     @Email
     private String email;
-    
+       
     @NotEmpty
     @Size(min = 4, max = 20)
     private String username;
@@ -98,23 +114,72 @@ public class User {
     public void setId(Long id) {
         this.id = id;
     }
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
+    
     public String getLastname() {
         return lastname;
     }
     public void setLastname(String lastname) {
         this.lastname = lastname;
     }
-    public String getEmail() {
-        return email;
+   
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+   
+    public String getBirthday() {
+        return birthday;
+    }
+    public void setBirthday(String birthday) {
+        this.birthday = birthday;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setMunicipality(String municipality) {
+        this.municipality = municipality;
+    }
+
+    public String getMunicipality() {
+        return municipality;
+    }
+
+    public void setProvince(String province) {
+        this.province = province;
+    }
+
+    public String getProvince() {
+        return province;
+    }
+
+    public void setPhone(Integer phone) {
+        this.phone = phone;
+    }
+
+    public Integer getPhone() {
+        return phone;
     }
     public void setEmail(String email) {
         this.email = email;
+    }
+    public String getEmail() {
+        return email;
     }
     public String getUsername() {
         return username;

@@ -5,6 +5,14 @@ import com.springboot.backend.ruslan.usersapp.users_backend.entities.User;
 import com.springboot.backend.ruslan.usersapp.users_backend.models.UserRequest;
 import com.springboot.backend.ruslan.usersapp.users_backend.services.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import java.util.Collections;
@@ -26,6 +34,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 
@@ -40,9 +50,11 @@ import org.springframework.web.bind.annotation.PutMapping;
  * están en diferentes dominios o puertos.
  * 
  */
-@CrossOrigin(origins = {"http://localhost:4200"}) 
+@CrossOrigin(origins = {"http://localhost:4200"}) //Permite el acceso a la API solo desde el origen http://localhost:4200 donde se encuentra el cliente de Angular
+@Tag(name = "Usuarios", description = "API para gestionar los usuarios")
 @RestController 
 @RequestMapping("/api/users") //Define la URL base para acceder a los métodos de la clase UserController
+
 public class UserController {
     @Autowired 
     private UserService service;
@@ -53,7 +65,13 @@ public class UserController {
      * @return devuelve una lista de usuarios y el estado HTTP 200 OK.
      */
 
-    @GetMapping 
+     @Operation(summary = "Obtener todos los usuarios", description = "Obtiene una lista de todos los usuarios registrados")
+        @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuarios encontrados"),
+            @ApiResponse(responseCode = "204", description = "No hay usuarios registrados")
+    }) 
+    @GetMapping
+   
     public List<User> list(){
         return service.findALL();
     }
@@ -64,9 +82,17 @@ public class UserController {
      * @param id pasa el id del usuario que se quiere mostrar.
      * @return devuelve un objeto de tipo ResponseEntity<?> con el usuario y el estado HTTP 200 OK.
      */
-
+    @Operation(summary = "Obtener un usuario", description = "Obtiene un usuario en concreto por su ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Usuario encontrado con el ID proporcionado"),
+        @ApiResponse(responseCode = "400", description = "Error en la validación de los datos del usuario", content = @Content(schema = @Schema(implementation = Map.class))),
+        @ApiResponse(responseCode = "404", description = "Usuario no encontrado con el ID proporcionado")
+    
+    })
     @GetMapping("/{id}") //Es un PathVariable lo que nos permite obtener el id de la URL
-    public ResponseEntity<?> show(@PathVariable Long id) {
+    
+    public ResponseEntity<?> show(
+        @Parameter(description = "Indica: ID del usuario a obtener", required = true) @PathVariable Long id) {
      
         Optional<User> userOptional = service.findById(id);
         if(userOptional.isPresent()) {
@@ -82,9 +108,17 @@ public class UserController {
      * @param user le pasamos un objeto de tipo User que se recibe en el cuerpo de la petición.
      * @return devuelve un objeto de tipo ResponseEntity<User> con el usuario guardado y el estado HTTP 201 Created.
      */
-
+    @Operation(summary = "Crear un usuario con roles", description = "Crea un nuevo usuario asignando su rol")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Usuario creado con éxito"),
+        @ApiResponse(responseCode = "400", description = "Error en la validación de los datos del usuario", content = @Content(schema = @Schema(implementation = Map.class))),
+        @ApiResponse(responseCode = "401", description = "El token de autorización es inválido o ha expirado"),
+        @ApiResponse(responseCode = "403", description = "No autorizado para crear el usuario")
+    })
     @PostMapping
-    public ResponseEntity<?> create(@Valid @RequestBody User user, BindingResult result) {
+    @SecurityRequirement(name = "BearerAuth")
+    public ResponseEntity<?> create(
+         @Valid @RequestBody @Parameter(description = "Campos obligatorios * del usuario a rellenar para crear uno nuevo") User user, BindingResult result) {
         /**
          * Si el objeto user tiene errores de validación, se recogen los errores en un Map y se devuelven al cliente Angular.
          */
@@ -104,9 +138,17 @@ public class UserController {
      * El método update() recibe un objeto de tipo User y un id de tipo Long y devuelve un objeto del tipo Optional<User>.
      * Mediante el método isPresent() comprobamos si el objeto Optional<User> contiene un valor. 
      */
-    
+    @Operation(summary = "Actualizar un usuario", description = "Actualiza un usuario existente por su ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Usuario actualizado con éxito"),
+        @ApiResponse(responseCode = "404", description = "Usuario no se ha podido actualizar con el ID proporcionado"),
+        @ApiResponse(responseCode = "401", description = "El token de autorización es inválido o ha expirado"),
+        @ApiResponse(responseCode = "403", description = "Error en la validación de los datos del usuario", content = @Content(schema = @Schema(implementation = Map.class)))
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<?> updtate(@Valid @RequestBody UserRequest user, BindingResult result, @PathVariable Long id) {
+    public ResponseEntity<?> updtate(
+        @Valid @RequestBody @Parameter(description = "Datos del usuario a actualizar sin contraseña") UserRequest user, BindingResult result,
+        @Parameter(description = "Proporciona: ID del usuario para editar sus campos") @PathVariable Long id) {
 
         if(result.hasErrors()){
             return validation(result);
@@ -129,9 +171,16 @@ public class UserController {
      * @param id pasa el id del usuario que se quiere eliminar.
      * @return  devuelve un objeto de tipo ResponseEntity<?> con el estado HTTP 204 No Content.
      */
-
+    @Operation(summary = "Eliminar un usuario", description = "Elimina un usuario existente por su ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Usuario eliminado con éxito"),
+        @ApiResponse(responseCode = "403", description = "No se ha podido eliminar el usuario"),
+        @ApiResponse(responseCode = "401", description = "El token de autorización es inválido o ha expirado"),
+        @ApiResponse(responseCode = "503", description = "Servicio no disponible. La API no está ejecutandose", content = @Content(schema = @Schema(implementation = String.class)))
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    public ResponseEntity<?> delete(
+        @Parameter(description = "Proporciona: ID del usuario a eliminar") @PathVariable Long id) {
         Optional<User> userOptional = service.findById(id);
         if(userOptional.isPresent()) {
             service.deleteById(id);
@@ -142,7 +191,10 @@ public class UserController {
     }
 
     /**
-     * Método que recoge los errores de validación.
+     * Cuando se usa @Valid en el parámetro User user, Spring realiza automáticamente una validación del objeto user 
+     * antes de invocar el método del controlador.
+     * Esta validación se hace con las reglas definidas en las anotaciones de validación del objeto User en la clase User.
+     * Si alguno de los campos no cumple con los criterios de validación, los errores se almacenan en el objeto BindingResult result.
      * @param result se le pasa un objeto de tipo BindingResult que contiene los errores de validación.
      * @return devuelve un objeto de tipo ResponseEntity<?> con los errores de validación y el estado HTTP 400 Bad Request.
      */

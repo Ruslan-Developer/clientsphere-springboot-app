@@ -55,16 +55,34 @@ public class SpringSecurityConfig {
         return new BCryptPasswordEncoder(); // Se crea un objeto de la clase BCryptPasswordEncoder con la configuración por defecto.
     }
 
+    /**
+     * Método que nos permite configurar la seguridad de la aplicación.
+     * Se configura el filtro de seguridad, se deshabilita el CSRF, se configura la política de sesiones y se añaden los filtros de autenticación y validación del token JWT.
+     * Con todo esto controlamos el acceso a los recursos de la aplicación, mediante la configuración de los permisos de acceso a los recursos.
+     * Mediante los roles de los usuarios establecemos los permisos de acceso a los distintos recursos de la aplicación.
+     * @param http
+     * @return
+     * @throws Exception
+     */
+
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         return http.authorizeHttpRequests(authz ->
         authz
         .requestMatchers(HttpMethod.GET, "/api/users", "/api/users/{users}").permitAll()
+        .requestMatchers(HttpMethod.GET, "/api/customers", "/api/customers/{customers}").permitAll()
+        //.requestMatchers(HttpMethod.GET, "/api/customers/{lastname}").permitAll()
+        .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/{products}").permitAll()
         .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasAnyRole("USER", "ADMIN")
         .requestMatchers(HttpMethod.POST, "/api/users").hasRole("ADMIN")
         .requestMatchers(HttpMethod.PUT, "/api/users/{id}").hasRole("ADMIN")
         .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasRole("ADMIN")
+        //Permitir acceso a la docuiemntación de springdoc-openapi
+        .requestMatchers("/v3/api-docs/**").permitAll()
+        .requestMatchers("/swagger-ui/**").permitAll()
+        .requestMatchers("/swagger-ui.html").permitAll()
+
         .anyRequest().authenticated())
         .cors(cors -> cors.configurationSource(configurationSource()))
         .addFilter(new JWTAuthenticationFilter(authenticationManager())) // Se añade el filtro de autenticación JWT
@@ -74,22 +92,37 @@ public class SpringSecurityConfig {
         .build();
 
     }
+
+    /**
+     * Método que nos permite configurar la política de CORS de la aplicación es decir solicitudes de recursos de origen cruzado.
+     * Es útil para cuando el cliente y el servidor se encuentran en diferentes dominios. 
+     * Aqui se permite el acceso desde localhost:4200 que es donde se encuentra el cliente de nuestra aplicación en Angular.
+     * Configuramos los metodos HTTP permitidos, los headers permitidos y si se permiten las credenciales.
+     * @return devuelve un objeto con la confuiguracion CORS que tiene como finalidad permitir el acceso a los recursos de la aplicación desde un origen distinto al del servidor.
+     */
     
     @Bean 
     CorsConfigurationSource configurationSource(){
 
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(Arrays.asList("*")); 
-        config.setAllowedOrigins(Arrays.asList("http://localhost:4200")); 
+        config.setAllowedOriginPatterns(Arrays.asList("*")); //Se permite que podamos establecer en el controlador el acceso desde cualquier origen.
+        config.setAllowedOrigins(Arrays.asList("http://localhost:4200")); //Se permite el acceso desde solo desde el origen http://localhost:4200.
         config.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE"));
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        config.setAllowCredentials(null);
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); 
+        config.setAllowCredentials(null); //No se permite el envío de credenciales como cookies o autenticación HTTP básica.
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/**", config); //Se registra la configuración CORS para todas las rutas de la aplicación.
         return source;
 
      }
+     /**
+      * Método que nos permite registrar un filtro de CORS en la aplicación.
+      * Se configura el filtro de CORS para que se ejecute antes que cualquier otro filtro.
+      * Se le pasa nuestra configuración CORS para que sepa como gestionar las solicitudes de recursos de origen cruzado.
+      * @return Finalmente, el filtro corsBean (que ahora está registrado con la configuración CORS y tiene la más alta prioridad) 
+      * es devuelto para que Spring Boot lo gestione y lo aplique durante el procesamiento de solicitudes HTTP
+      */
 
      @Bean
      FilterRegistrationBean<CorsFilter> corsFilter() {

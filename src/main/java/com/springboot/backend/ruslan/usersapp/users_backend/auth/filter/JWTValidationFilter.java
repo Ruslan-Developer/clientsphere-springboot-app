@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.crypto.SecretKey;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,6 +31,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class JWTValidationFilter extends BasicAuthenticationFilter{
 
+
+
+
     public JWTValidationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
 
@@ -37,6 +42,8 @@ public class JWTValidationFilter extends BasicAuthenticationFilter{
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+
+           
         
             String header = request.getHeader(HEADER_AUTHORIZATION);
 
@@ -65,7 +72,7 @@ public class JWTValidationFilter extends BasicAuthenticationFilter{
                 
                 Map<String, String> body = new HashMap<>();
                 body.put("error", e.getMessage());
-                body.put("message", "El token no es válido");
+                body.put("message", "El token no es valido");
 
                 response.getWriter().write(new ObjectMapper().writeValueAsString(body));
                 response.setStatus(401);

@@ -35,7 +35,7 @@ import com.springboot.backend.ruslan.usersapp.users_backend.repositories.UserRep
  * @Autowired Inyección de dependencias para asi poder acceder a los métodos de la clase UserRepository
  * @Transactional se utiliza para definir el alanance de una transacción en un método. Un transacción
  * es una unidad de trabajo que se ejecuta de forma atómica, es decir, o se ejecuta completamente o no se ejecuta.
- * Garantiza que las operaciones dentro de la transacción se ejevuten de manera aislada y segura para mantener la base de datos
+ * Garantiza que las operaciones dentro de la transacción se ejecuten de manera aislada y segura para mantener la base de datos
  * segura y consistente.
  * 
  */
@@ -111,6 +111,13 @@ public class UserServiceImpl implements UserService {
             userBD.setLastname(user.getLastname());
             userBD.setName(user.getName());
             userBD.setUsername(user.getUsername());
+            userBD.setBirthday(user.getBirthday());
+            userBD.setGender(user.getGender());
+            userBD.setCountry(user.getCountry());
+            userBD.setMunicipality(user.getMunicipality());
+            userBD.setProvince(user.getProvince());
+            userBD.setAdmin(user.isAdmin());
+          
 
             //Antes de guardar actualizar el rol del usuario
             List<Role> roles = new ArrayList<>();
