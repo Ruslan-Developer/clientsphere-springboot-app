@@ -47,7 +47,7 @@ Esta API REST ha sido desarrollada con **Spring Boot** para gestionar usuarios, 
 1. Clona el repositorio:
 
     ```bash
-    git clone https://github.com/Ruslan-Developer/spring_users_app_backend.git
+    git clone https://github.com/Ruslan-Developer/clientsphere-springboot-app.git
     ```
 
 2. Abre el proyecto en tu IDE favorito.
