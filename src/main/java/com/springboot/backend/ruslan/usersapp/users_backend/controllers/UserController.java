@@ -137,6 +137,8 @@ public class UserController {
      * Dentro del método llamamos al método update() de la clase UserServiceImpl a traves de la interfaz UserService.
      * El método update() recibe un objeto de tipo User y un id de tipo Long y devuelve un objeto del tipo Optional<User>.
      * Mediante el método isPresent() comprobamos si el objeto Optional<User> contiene un valor. 
+     * 
+     * 
      */
     @Operation(summary = "Actualizar un usuario", description = "Actualiza un usuario existente por su ID")
     @ApiResponses(value = {
