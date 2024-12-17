@@ -11,4 +11,6 @@ public interface ICustomerService {
     
     Optional<Customer> findByLastname(String lastname);
 
+    Customer saveCust(Customer customer);    
+
 }

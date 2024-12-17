@@ -81,12 +81,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         org.springframework.security.core.userdetails.User user = (org.springframework.security.core.userdetails.User) authResult.getPrincipal();
         
         String username = user.getUsername();
-        /**
-         * ! NOTA: Revisar funcionamiento de esta parte del código, en concreto:
-         * ! Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
-         * ! Claims claims = Jwts
-         * ! String jwt = Jwts.builder()
-         */
+    
         Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
         //Si encuentra el rol de administrador, isAdmin será true.
         boolean isAdmin = roles.stream().anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"));
@@ -136,7 +131,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         
         Map<String, String> body = new HashMap<>();
 
-        body.put("message", "Error de autenticación: " + failed.getMessage());
+        body.put("message", "Token no válido: Error de autenticación: " + failed.getMessage());
         body.put("error", failed.getMessage());
         
         response.getWriter().write(new ObjectMapper().writeValueAsString(body));

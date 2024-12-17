@@ -29,9 +29,17 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Es un filtro de autenticación que se utiliza para validar tokens JWT en las peticiones.
+ * Extiende de la clase BasicAuthenticationFilter que es un filtro de autenticación básico de Spring Security.
+ * Se encarga de validar el token JWT que se envía en la cabecera de la petición.
+ * Si el token es válido, se extraen los claims (reclamaciones) del token, incluyendo el nombre de usuario (username)
+ *  y los roles (authorities).
+ * Se crean los roles a partir de las authorities obtenidas del token.
+ * Se crea un objeto UsernamePasswordAuthenticationToken con el nombre de usuario y los roles.
+ */
+
 public class JWTValidationFilter extends BasicAuthenticationFilter{
-
-
 
 
     public JWTValidationFilter(AuthenticationManager authenticationManager) {

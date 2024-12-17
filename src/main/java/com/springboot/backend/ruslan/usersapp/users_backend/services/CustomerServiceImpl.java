@@ -35,6 +35,12 @@ public class CustomerServiceImpl implements ICustomerService {
         return this.customerRepository.findByLastname(lastname);
     }
 
+
+    @Override
+    public Customer saveCust(Customer customer) {
+        return this.customerRepository.save(customer);
+    }
+
   
 
 

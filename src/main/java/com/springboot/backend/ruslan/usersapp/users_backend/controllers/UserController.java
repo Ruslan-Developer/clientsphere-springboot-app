@@ -188,7 +188,9 @@ public class UserController {
             return ResponseEntity.noContent().build(); 
         }
             return ResponseEntity.notFound().build();
-    }
+    }  
+ 
+    
 
     /**
      * Cuando se usa @Valid en el parámetro User user, Spring realiza automáticamente una validación del objeto user 
